@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db:
     image: postgres:latest
-    container_name: postgres
+    container_name: postgres-go
     environment:
       POSTGRES_USER: ghiri
       POSTGRES_PASSWORD: develop
@@ -12,6 +12,28 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: basic
+    volumes:
+      - ./src:/app/src
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: postgres-go
+      DB_PORT: 5432
+      DB_USER: ghiri
+      DB_PASSWORD: develop
+      DB_NAME: items
+    develop:
+      watch:
+        - path: ./app
+          action: rebuild
+    depends_on:
+      - db
 
 volumes:
   postgres_data:

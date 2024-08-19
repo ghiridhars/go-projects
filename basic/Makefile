@@ -1,41 +1,32 @@
-# Variables
-APP_NAME=basic
-DOCKER_IMAGE_NAME=$(APP_NAME):latest
+.PHONY: build run docker-build docker-run docker-run-dev clean
 
-# Default target to build the binary and Docker image
-all: build docker-build
-
-# Build the Go application
+# Build the Go application binary
 build:
-	@echo "Building the Go binary..."
-	cd src && go build -o main .
+	@echo "Building the Go application..."
+	docker-compose run --rm app go build -o main .
 
-# Run the Go application locally
-run: build
-	@echo "Running the Go application locally..."
-	cd src && ./main
+# Run the Go application (dev mode)
+run:
+	@echo "Running the Go application..."
+	docker-compose run --rm app go run main.go
 
 # Build the Docker image
 docker-build:
 	@echo "Building the Docker image..."
-	docker build -t $(DOCKER_IMAGE_NAME) .
+	docker-compose build
 
-# Run the Docker container
+# Run the Docker containers
 docker-run:
-	@echo "Running the Docker container..."
-	@docker run --name postgres -e POSTGRES_USER=ghiri -e POSTGRES_PASSWORD=develop -e POSTGRES_DB=items -p 5432:5432 -d postgres:latest
-	@docker run -d -p 8080:8080 --name $(APP_NAME) $(DOCKER_IMAGE_NAME)
+	@echo "Starting the Docker containers..."
+	docker-compose up -d
 
-# Stop the Docker container
-docker-stop:
-	@echo "Stopping the Docker container..."
-	docker stop $(APP_NAME) || true
-	docker rm $(APP_NAME) || true
+# Run in dev mode with live reload
+docker-run-dev:
+	@echo "Running Docker containers in dev mode with live reload..."
+	docker-compose up --build
 
-# Clean up binaries and Docker containers/images
+# Clean the built files and containers
 clean:
 	@echo "Cleaning up..."
-	cd src && rm -f main
-	docker rmi -f $(DOCKER_IMAGE_NAME) || true
-
-.PHONY: all build run docker-build docker-run docker-stop clean
+	docker-compose down
+	rm -f main
