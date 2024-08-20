@@ -1,30 +1,36 @@
-# Stage 1: Build the Go binary
+# Step 1: Use an official Golang image as a base
 FROM golang:1.23-alpine AS builder
 
-# Set the Current Working Directory inside the container
+# Step 2: Set the Current Working Directory inside the container
 WORKDIR /app
 
-# Copy go.mod and go.sum files
+# Step 3: Copy go.mod and go.sum files
 COPY src/go.mod src/go.sum ./
 
-# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
+# Step 4: Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
 RUN go mod download
 
-# Copy the source from the current directory to the Working Directory inside the container
+# Step 5: Copy the source code into the container
 COPY src/ .
 
-# Build the Go app
+# Step 6: Build the Go application
 RUN go build -o main .
 
-# Run the Go binary in a lightweight container
+# Step 7: Multi-stage build to reduce the final image size
 FROM alpine:latest
 
-WORKDIR /root/
+# Step 8: Set the Current Working Directory inside the container
+WORKDIR /app
 
+# Step 9: Copy the binary from the builder stage
 COPY --from=builder /app/main .
 
-# Expose port 8080 to the outside world
+# Step 10: Copy templates and static files into the container
+COPY --from=builder /app/templates ./templates
+COPY --from=builder /app/static ./static
+
+# Step 11: Expose port 8080 to the outside world
 EXPOSE 8080
 
-# Command to run the executable
+# Step 12: Command to run the executable
 CMD ["./main"]
