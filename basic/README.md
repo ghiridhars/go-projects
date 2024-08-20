@@ -47,9 +47,7 @@ This Go application is a simple web service that serves a homepage with an HTMX-
    make docker-run-dev
 
 2. **Access the Application**:
-    ```bash
    Visit http://localhost:8080 to view the application.
    
 3. **Modify and Test**:
-   ```bash
    Make changes to the code, and the updates will be reflected within the running container.
