@@ -14,7 +14,7 @@ RUN go mod download
 COPY src/ .
 
 # Step 6: Build the Go application
-RUN go build -o main .
+RUN go build -gcflags=all="-N -l" -o main .
 
 # Step 7: Multi-stage build to reduce the final image size
 FROM alpine:latest

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"database/sql"
+	"basic/database"
+	"basic/handlers"
 	"fmt"
 	"html/template"
 	"log"
-	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -13,38 +13,6 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
-
-var db *sql.DB
-
-func initDB() {
-	var err error
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
-	// "postgres://ghiri:develop@postgres-go:5432/items?sslmode=disable"
-	slog.Info(connStr)
-	db, err = sql.Open("postgres", connStr)
-	if err != nil {
-		log.Fatal(err)
-	}
-	slog.Info("success")
-
-	if err = db.Ping(); err != nil {
-		slog.Error("Postgres ping error : (%v)", err)
-	}
-
-	// create items if not there
-	query := `
-    CREATE TABLE IF NOT EXISTS items (
-        id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL
-    );`
-	_, err = db.Exec(query)
-
-	slog.Info("SUccess")
-	if err != nil {
-		log.Fatal(err)
-	}
-}
 
 func homePage(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
@@ -70,7 +38,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	initDB()
+	database.InitializeDb()
 
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -78,10 +46,10 @@ func main() {
 	// Serve static files (e.g., HTMX if used locally)
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
-	router.HandleFunc("/items", getItems).Methods("GET")
-	router.HandleFunc("/createItem", createItem).Methods("POST")
-	router.HandleFunc("/deleteItem/{id}", deleteItem).Methods("DELETE")
-	router.HandleFunc("/udpateItem/{id}", updateItem).Methods("PUT")
+	router.HandleFunc("/items", handlers.GetItems).Methods("GET")
+	router.HandleFunc("/createItem", handlers.CreateItem).Methods("POST")
+	router.HandleFunc("/deleteItem/{id}", handlers.DeleteItem).Methods("DELETE")
+	router.HandleFunc("/udpateItem/{id}", handlers.UpdateItem).Methods("PUT")
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
