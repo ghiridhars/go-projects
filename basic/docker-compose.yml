@@ -28,6 +28,8 @@ services:
       DB_USER: ghiri
       DB_PASSWORD: develop
       DB_NAME: items
+      GOOGLE_CLIENT_ID: 256341860286-mita03c05nurnr52bvf4ejmnvls473on.apps.googleusercontent.com
+      GOOGLE_CLIENT_SECRET: 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
     develop:
       watch:
         - path: ./app
