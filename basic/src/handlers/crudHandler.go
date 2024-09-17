@@ -3,7 +3,6 @@ package handlers
 import (
 	"basic/database"
 	"basic/model"
-	"database/sql"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -13,19 +12,18 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var db *sql.DB
-
 // get all items
 func GetItems(w http.ResponseWriter, r *http.Request) {
 	slog.Info("getitems---------------START")
-
 	var items []model.Item = database.GetItemsDAO()
+	slog.Info("getitems---------------END")
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(items)
 }
 
 // create an item
 func CreateItem(w http.ResponseWriter, r *http.Request) {
+	slog.Info("CreateItem---------------START")
 	var newItem model.Item
 	if err := json.NewDecoder(r.Body).Decode(&newItem); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -39,6 +37,8 @@ func CreateItem(w http.ResponseWriter, r *http.Request) {
 
 	successIns := database.CreateItemDAO(newItem)
 
+	slog.Info("CreateItem---------------END")
+
 	// newItem.ID = fmt.Sprint("%d", id)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(successIns)
@@ -46,6 +46,7 @@ func CreateItem(w http.ResponseWriter, r *http.Request) {
 
 // Update an item by ID
 func UpdateItem(w http.ResponseWriter, r *http.Request) {
+	slog.Info("UpdateItem---------------START")
 	params := mux.Vars(r)
 	var updatedItem model.Item
 	if err := json.NewDecoder(r.Body).Decode(&updatedItem); err != nil {
@@ -65,11 +66,13 @@ func UpdateItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	updatedItem.ID = params["id"]
+	slog.Info("UpdateItem---------------END")
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(updatedItem)
 }
 
 func DeleteItem(w http.ResponseWriter, r *http.Request) {
+	slog.Info("DeleteItem---------------START")
 	params := mux.Vars(r)
 
 	rowsAffected := database.DeleteItemDAO(params["id"])
@@ -78,6 +81,7 @@ func DeleteItem(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Item not found", http.StatusNotFound)
 		return
 	}
+	slog.Info("DeleteItem---------------END")
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"result": "success"})

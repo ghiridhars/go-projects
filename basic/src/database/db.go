@@ -36,6 +36,12 @@ func InitializeDb() *sql.DB {
     CREATE TABLE IF NOT EXISTS items (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL
+    );
+	CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+		email TEXT NOT NULL,
+		token TEXT NOT NULL
     );`
 	_, err = Db.Exec(query)
 
@@ -113,4 +119,35 @@ func DeleteItemDAO(id string) int64 {
 	}
 
 	return rows
+}
+
+func CreateUserDAO(newUser model.User) string {
+	err := Db.QueryRow("INSERT INTO users (name,email,token) VALUES ($1,$2,$3) RETURNING id;", newUser.Name, newUser.Email, newUser.OAuthToken).Scan(&newUser.ID)
+	successMsg := "Successfully Inserted"
+	if err != nil {
+		log.Fatal("FATAL ERROR::::::::::")
+		log.Fatal(errors.New("DB error"))
+		successMsg = "Error while inserting"
+	}
+	return successMsg
+}
+
+func GetUserByMail(email string) model.User {
+	var authUser model.User
+	rows, err := Db.Query("SELECT * FROM users WHERE email = $1", email)
+	if err != nil {
+		log.Fatal("FATAL ERROR::::::::::")
+		log.Fatal(errors.New("DB error"))
+		return model.User{}
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		if err := rows.Scan(&authUser.ID, &authUser.Name, &authUser.Email, &authUser.OAuthToken); err != nil {
+			log.Fatal("FATAL ERROR::::::::::")
+			log.Fatal(errors.New("Parsing error"))
+			return model.User{}
+		}
+	}
+	return authUser
 }
