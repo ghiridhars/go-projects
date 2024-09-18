@@ -23,25 +23,57 @@
             <h1 style="font-size: 1.5rem; color: #333;">My Website</h1>
         </div>
         <ul>
-            <li><a href="#">Home</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Services</a></li>
-            <li><a href="#">Contact</a></li>
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <button class="login-btn" id="login-btn">
+                <!-- <img src="../static/google-png.png" alt="Google logo"> -->
+                <i class="fab fa-google"></i>
+            </button>
         </ul>
+
+        <i class="fas fa-moon theme-toggle" id="theme-toggle"></i>
+
         <!-- Google-style Login button with Google logo -->
-        <button class="login-btn" onclick="window.location.href='/login'">
+        <!-- <button class="login-btn" onclick="window.location.href='/login'">
             <img src="../static/google-png.png" alt="Google logo">
             Sign in with Google
-        </button>
+        </button> -->
+
 
         <!-- Theme toggle button
         <button hx-get="/toggle-theme" hx-trigger="click" hx-swap="outerHTML">Switch to Dark Theme</button> -->
 
-        <i class="fas fa-moon theme-toggle" id="theme-toggle"></i>
         <!-- Theme toggle icon, this will trigger the HTMX request -->
         <!-- <i id="theme-toggle-icon" class="fas fa-moon theme-toggle-icon" hx-get="/toggle-theme" hx-swap="outerHTML"
             hx-trigger="click"></i> -->
     </nav>
+    <!-- The Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-modal">&times;</span>
+            <h2>Login</h2>
+            <a onclick="window.location.href='/login'" class="login-btn">
+                <i class="fab fa-google">
+                    <p>Continue with Google</p>
+                </i>
+            </a>
+        </div>
+    </div>
+
+    <div>
+        <form hx-post="/" hx-target="#result">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+
+    <!-- Footer section -->
+    <footer class="footer">
+        <p>© 2024 Ghiri's GO Website. All rights reserved.</p>
+    </footer>
 
     <script>
         document.getElementById('theme-toggle').addEventListener('click', function () {
@@ -67,22 +99,31 @@
                 document.getElementById('theme-toggle').classList.replace('fa-moon', 'fa-sun');
             }
         };
+
+
+        // Modal functionality
+        var modal = document.getElementById("loginModal");
+        var btn = document.getElementById("login-btn");
+        var span = document.getElementById("close-modal");
+
+        // Open the modal when the login button is clicked
+        btn.onclick = function () {
+            modal.style.display = "block";
+        };
+
+        // Close the modal when the close button (X) is clicked
+        span.onclick = function () {
+            modal.style.display = "none";
+        };
+
+        // Close the modal when clicking outside of it
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        };
     </script>
 
-    <div>
-        <form hx-post="/" hx-target="#result">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-            <button type="submit">Submit</button>
-        </form>
-        <div id="result"></div>
-    </div>
-
-
-    <!-- Footer section -->
-    <footer class="footer">
-        <p>© 2024 Ghiri's GO Website. All rights reserved.</p>
-    </footer>
 
 </body>
 
